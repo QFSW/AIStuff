@@ -10,7 +10,7 @@ namespace AIStuff
     {
         static void Main(string[] args)
         {
-            IGame<int, int> game = new ConnectN(6, 4);
+            IGame<int, int> game = new ConnectN(7, 6, 4);
             Console.WriteLine(game);
 
             int turn = 0;

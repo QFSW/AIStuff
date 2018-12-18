@@ -10,7 +10,8 @@ namespace AIStuff
     {
         private readonly char defaultChar = '-';
         private readonly char[] playerChars = new char[] { 'x', 'o' };
-        private readonly int boardLength;
+        private readonly int boardWidth;
+        private readonly int boardHeight;
         private readonly int boardSize;
         private readonly int connectLength;
 
@@ -19,11 +20,11 @@ namespace AIStuff
         public override string ToString()
         {
             string newStr = "";
-            for (int i = 0; i < boardLength; i++)
+            for (int i = 0; i < boardHeight; i++)
             {
-                for (int j = 0; j < boardLength; j++)
+                for (int j = 0; j < boardWidth; j++)
                 {
-                    newStr = $"{newStr}{board[i * boardLength + j]} ";
+                    newStr = $"{newStr}{board[i * boardWidth + j]} ";
                 }
                 newStr = $"{newStr}\n";
             }
@@ -31,11 +32,12 @@ namespace AIStuff
             return newStr;
         }
 
-        public ConnectN(int boardLength, int connectLength)
+        public ConnectN(int boardWidth, int boardHeight, int connectLength)
         {
-            this.boardLength = boardLength;
+            this.boardWidth = boardWidth;
+            this.boardHeight = boardHeight;
             this.connectLength = connectLength;
-            boardSize = boardLength * boardLength;
+            boardSize = boardWidth * boardHeight;
             board = new char[boardSize];
 
             for (int i = 0; i < boardSize; i++) { board[i] = defaultChar; }
@@ -51,8 +53,8 @@ namespace AIStuff
 
         public int[] GetAllMoves(int player)
         {
-            List<int> moves = new List<int>(boardLength);
-            for (int i = 0; i < boardLength; i++) { if (board[i] == defaultChar) { moves.Add(i); } }
+            List<int> moves = new List<int>(boardWidth);
+            for (int i = 0; i < boardWidth; i++) { if (board[i] == defaultChar) { moves.Add(i); } }
 
             return moves.ToArray();
         }
@@ -62,14 +64,20 @@ namespace AIStuff
             float LocalHeuristic(int pl)
             {
                 float heuristic = 0;
-                for (int i = 0; i < boardLength; i++)
+                for (int i = 0; i < boardWidth; i++)
                 {
-                    heuristic += EvaluateLine(pl, i * boardLength, (i + 1) * boardLength - 1);
-                    heuristic += EvaluateLine(pl, i, i + boardLength * (boardLength - 1));
+                    heuristic += EvaluateLine(pl, i, i + boardWidth * (boardHeight - 1));
                     heuristic += EvaluateDiagonal(pl, i, 1, 1);
                     heuristic += EvaluateDiagonal(pl, i, -1, 1);
-                    heuristic += EvaluateDiagonal(pl, i * boardLength, 1, 1);
-                    heuristic += EvaluateDiagonal(pl, i * boardLength, 1, -1);
+                }
+
+                for (int i = 0; i < boardHeight; i++)
+                {
+                    heuristic += EvaluateLine(pl, i * boardWidth, (i + 1) * boardWidth - 1);
+                    heuristic += EvaluateDiagonal(pl, i, 1, 1);
+                    heuristic += EvaluateDiagonal(pl, i, -1, 1);
+                    heuristic += EvaluateDiagonal(pl, i * boardWidth, 1, 1);
+                    heuristic += EvaluateDiagonal(pl, i * boardWidth, 1, -1);
                 }
 
                 return heuristic;
@@ -86,16 +94,16 @@ namespace AIStuff
 
         private IEnumerable<char> GetLine(int start, int end)
         {
-            int x1 = start % boardLength;
-            int x2 = end % boardLength;
-            int y1 = start / boardLength;
-            int y2 = end / boardLength;
+            int x1 = start % boardWidth;
+            int x2 = end % boardWidth;
+            int y1 = start / boardWidth;
+            int y2 = end / boardWidth;
 
             for (int i = y1; i <= y2; i++)
             {
                 for (int j = x1; j <= x2; j++)
                 {
-                    yield return board[i * boardLength + j];
+                    yield return board[i * boardWidth + j];
                 }
             }
         }
@@ -107,13 +115,13 @@ namespace AIStuff
 
         private IEnumerable<char> GetDiagonal(int start, int dir1, int dir2)
         {
-            int i = start % boardLength;
-            int j = start / boardLength;
+            int i = start % boardWidth;
+            int j = start / boardWidth;
 
             bool valid = true;
             while (valid)
             {
-                int index = j * boardLength + i;
+                int index = j * boardWidth + i;
                 valid = (index >= 0 && index < boardSize);
                 if (valid)
                 {
@@ -122,8 +130,8 @@ namespace AIStuff
                     i += dir1;
                     j += dir2;
 
-                    if (i >= boardLength || i < 0) { valid = false; }
-                    if (j >= boardLength || j < 0) { valid = false; }
+                    if (i >= boardWidth || i < 0) { valid = false; }
+                    if (j >= boardHeight || j < 0) { valid = false; }
                 }
             }
         }
@@ -171,11 +179,11 @@ namespace AIStuff
             if (!(ValidMove(move, player))) { return false; }
             if (player < 0 || player >= 2) { return false; }
 
-            for (int i = boardLength - 1;  i >= 0; i--)
+            for (int i = boardHeight - 1;  i >= 0; i--)
             {
-                if (board[i * boardLength + move] == defaultChar)
+                if (board[i * boardWidth + move] == defaultChar)
                 {
-                    board[i * boardLength + move] = playerChars[player];
+                    board[i * boardWidth + move] = playerChars[player];
                     return true;
                 }
             }
@@ -199,7 +207,7 @@ namespace AIStuff
 
         public bool ValidMove(int move, int player)
         {
-            if (move < 0 || move >= boardLength) { return false; }
+            if (move < 0 || move >= boardWidth) { return false; }
             if (board[move] != defaultChar) { return false; }
 
             return true;
