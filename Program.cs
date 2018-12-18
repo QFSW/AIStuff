@@ -10,7 +10,7 @@ namespace AIStuff
     {
         static void Main(string[] args)
         {
-            IGame<int, int> game = new ConnectN(10, 4);
+            IGame<int, int> game = new ConnectN(6, 4);
             Console.WriteLine(game);
 
             int turn = 0;
@@ -20,7 +20,7 @@ namespace AIStuff
             {
                 do
                 {
-                    if (turn == -1)
+                    if (turn == 0)
                     {
                         Console.WriteLine($"p{(turn + 1)} turn: ");
                         try { move = int.Parse(Console.ReadLine()); }
@@ -29,14 +29,13 @@ namespace AIStuff
                     else
                     {
                         Console.WriteLine($"p{(turn + 1)} is thinking...");
-                        move = MiniMax.GetBestMove(game, turn, 4);
+                        move = MiniMax.GetBestMove(game, turn, 5);
                     }
 
                     moveValid = game.MakeMove(move, turn);
                 } while (!moveValid);
 
                 Console.WriteLine(game);
-                Console.WriteLine(game.GetHeuristic(turn));
                 turn = 1 - turn;
             }
 

@@ -59,16 +59,24 @@ namespace AIStuff
 
         public float GetHeuristic(int player)
         {
-            float heuristic = 0;
-            for (int i = 0; i < boardLength; i++)
+            float LocalHeuristic(int pl)
             {
-                heuristic += EvaluateLine(player, i * boardLength, (i + 1) * boardLength - 1);
-                heuristic += EvaluateLine(player, i, i + boardLength * (boardLength - 1));
-                heuristic -= EvaluateLine(1 - player, i * boardLength, (i + 1) * boardLength - 1);
-                heuristic -= EvaluateLine(1 - player, i, i + boardLength * (boardLength - 1));
+                float heuristic = 0;
+                for (int i = 0; i < boardLength; i++)
+                {
+                    heuristic += EvaluateLine(pl, i * boardLength, (i + 1) * boardLength - 1);
+                    heuristic += EvaluateLine(pl, i, i + boardLength * (boardLength - 1));
+                    heuristic += EvaluateDiagonal(pl, i, 1, 1);
+                    heuristic += EvaluateDiagonal(pl, i, -1, 1);
+                    heuristic += EvaluateDiagonal(pl, i * boardLength, 1, 1);
+                    heuristic += EvaluateDiagonal(pl, i * boardLength, 1, -1);
+                }
+
+                return heuristic;
+
             }
 
-            return heuristic;
+            return LocalHeuristic(player) - LocalHeuristic(1 - player);
         }
 
         private float EvaluateLine(int player, int start, int end)
@@ -76,7 +84,7 @@ namespace AIStuff
             return EvaluateSequence(player, GetLine(start, end));
         }
 
-        private IEnumerable<int> GetLine(int start, int end)
+        private IEnumerable<char> GetLine(int start, int end)
         {
             int x1 = start % boardLength;
             int x2 = end % boardLength;
@@ -92,7 +100,35 @@ namespace AIStuff
             }
         }
 
-        private float EvaluateSequence(int player, IEnumerable<int> sequence)
+        private float EvaluateDiagonal(int player, int start, int dir1, int dir2)
+        {
+            return EvaluateSequence(player, GetDiagonal(start, dir1, dir2));
+        }
+
+        private IEnumerable<char> GetDiagonal(int start, int dir1, int dir2)
+        {
+            int i = start % boardLength;
+            int j = start / boardLength;
+
+            bool valid = true;
+            while (valid)
+            {
+                int index = j * boardLength + i;
+                valid = (index >= 0 && index < boardSize);
+                if (valid)
+                {
+                    yield return board[index];
+
+                    i += dir1;
+                    j += dir2;
+
+                    if (i >= boardLength || i < 0) { valid = false; }
+                    if (j >= boardLength || j < 0) { valid = false; }
+                }
+            }
+        }
+
+        private float EvaluateSequence(int player, IEnumerable<char> sequence)
         {
             const float baseValue = 1;
             int highestPossibleChain = 0;
@@ -100,7 +136,7 @@ namespace AIStuff
             float highest = 0;
             float value = baseValue;
 
-            foreach (int item in sequence)
+            foreach (char item in sequence)
             {
                 if (item == playerChars[player])
                 {
