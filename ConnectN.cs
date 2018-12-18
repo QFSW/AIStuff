@@ -199,7 +199,7 @@ namespace AIStuff
 
         public bool ValidMove(int move, int player)
         {
-            if (move < 0 || move >= boardSize) { return false; }
+            if (move < 0 || move >= boardLength) { return false; }
             if (board[move] != defaultChar) { return false; }
 
             return true;
