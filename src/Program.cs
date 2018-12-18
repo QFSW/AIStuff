@@ -20,7 +20,7 @@ namespace AIStuff
             {
                 do
                 {
-                    if (turn == 0)
+                    if (turn == -1)
                     {
                         Console.WriteLine($"p{(turn + 1)} turn: ");
                         try { move = int.Parse(Console.ReadLine()); }

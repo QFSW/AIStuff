@@ -37,7 +37,7 @@ namespace AIStuff
                     else if (state == TerminalGameResult.Tie) { newHeuristic = 0; }
                     else { queuedMoves.Add(gameCopy); }
 
-                    if (newHeuristic > heuristic)
+                    if (newHeuristic >= heuristic)
                     {
                         heuristic = newHeuristic;
                         bestMove = moves[i];
@@ -57,7 +57,7 @@ namespace AIStuff
                     }
                     else { newHeuristic = -queuedMoves[i].GetHeuristic(queuedMoves[i].NextPlayer(player)); }
 
-                    if (newHeuristic > heuristic)
+                    if (newHeuristic >= heuristic)
                     {
                         heuristic = newHeuristic;
                         bestMove = moves[i];
