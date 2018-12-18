@@ -17,46 +17,52 @@ namespace AIStuff
         static private void GetBestMove<TMove, TPlayer>(IGame<TMove, TPlayer> game, TPlayer player, int depth, out float heuristic, out TMove bestMove)
         {
             TMove[] moves = game.GetAllMoves(player);
-            float[] results = new float[moves.Length];
+            List<IGame<TMove, TPlayer>> queuedMoves = new List<IGame<TMove, TPlayer>>();
 
             heuristic = float.NegativeInfinity;
             bestMove = default(TMove);
 
             for (int i = 0; i < moves.Length; i++)
             {
-                if (heuristic < float.PositiveInfinity)
+                if (!float.IsPositiveInfinity(heuristic))
                 {
                     IGame<TMove, TPlayer> gameCopy = (IGame<TMove, TPlayer>)game.Clone();
                     gameCopy.MakeMove(moves[i], player);
 
                     TerminalGameResult state = gameCopy.TerminalStatus(player);
-                    if (state == TerminalGameResult.Win) { results[i] = float.PositiveInfinity; }
-                    else if (state == TerminalGameResult.Lose) { results[i] = float.NegativeInfinity; }
-                    else if (state == TerminalGameResult.Tie) { results[i] = 0; }
-                    else
-                    {
-                        if (depth > 0)
-                        {
-                            GetBestMove(gameCopy, gameCopy.NextPlayer(player), depth - 1, out float newHeuristic, out TMove newMove);
-                            results[i] = -newHeuristic;
-                        }
-                        else { results[i] = -gameCopy.GetHeuristic(gameCopy.NextPlayer(player)); }
-                    }
+                    float newHeuristic = float.NegativeInfinity;
 
-                    if (results[i] >= heuristic)
+                    if (state == TerminalGameResult.Win) { newHeuristic = float.PositiveInfinity; }
+                    else if (state == TerminalGameResult.Lose) { newHeuristic = float.NegativeInfinity; }
+                    else if (state == TerminalGameResult.Tie) { newHeuristic = 0; }
+                    else { queuedMoves.Add(gameCopy); }
+
+                    if (newHeuristic > heuristic)
                     {
-                        heuristic = results[i];
+                        heuristic = newHeuristic;
                         bestMove = moves[i];
                     }
                 }
             }
 
-            if (moves.Length == 0)
+            for (int i = 0; i < queuedMoves.Count; i++)
             {
-                TerminalGameResult state = game.TerminalStatus(player);
-                if (state == TerminalGameResult.Win) { heuristic = 1; }
-                else if (state == TerminalGameResult.Lose) { heuristic = -1; }
-                else if (state == TerminalGameResult.Tie) { heuristic = 0; }
+                if (!float.IsPositiveInfinity(heuristic))
+                {
+                    float newHeuristic;
+                    if (depth > 0)
+                    {
+                        GetBestMove(queuedMoves[i], queuedMoves[i].NextPlayer(player), depth - 1, out newHeuristic, out TMove newMove);
+                        newHeuristic = -newHeuristic;
+                    }
+                    else { newHeuristic = -queuedMoves[i].GetHeuristic(queuedMoves[i].NextPlayer(player)); }
+
+                    if (newHeuristic > heuristic)
+                    {
+                        heuristic = newHeuristic;
+                        bestMove = moves[i];
+                    }
+                }
             }
         }
     }
