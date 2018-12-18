@@ -69,15 +69,13 @@ namespace AIStuff
                     heuristic += EvaluateLine(pl, i, i + boardWidth * (boardHeight - 1));
                     heuristic += EvaluateDiagonal(pl, i, 1, 1);
                     heuristic += EvaluateDiagonal(pl, i, -1, 1);
+                    heuristic += EvaluateDiagonal(pl, i + boardWidth * (boardHeight - 1), 1, -1);
+                    heuristic += EvaluateDiagonal(pl, i + boardWidth * (boardHeight - 1), -1, -1);
                 }
 
                 for (int i = 0; i < boardHeight; i++)
                 {
                     heuristic += EvaluateLine(pl, i * boardWidth, (i + 1) * boardWidth - 1);
-                    heuristic += EvaluateDiagonal(pl, i, 1, 1);
-                    heuristic += EvaluateDiagonal(pl, i, -1, 1);
-                    heuristic += EvaluateDiagonal(pl, i * boardWidth, 1, 1);
-                    heuristic += EvaluateDiagonal(pl, i * boardWidth, 1, -1);
                 }
 
                 return heuristic;
